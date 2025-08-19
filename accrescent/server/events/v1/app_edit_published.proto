@@ -7,6 +7,7 @@ syntax = "proto3";
 package accrescent.server.events.v1;
 
 import "accrescent/server/events/v1/app_edit.proto";
+import "buf/validate/validate.proto";
 
 option java_multiple_files = true;
 option java_package = "app.accrescent.server.events.v1";
@@ -14,5 +15,5 @@ option java_package = "app.accrescent.server.events.v1";
 // An event indicating that an app edit has been published.
 message AppEditPublished {
   // The metadata corresponding to the edit published.
-  AppEdit edit = 1;
+  AppEdit edit = 1 [(buf.validate.field).required = true];
 }

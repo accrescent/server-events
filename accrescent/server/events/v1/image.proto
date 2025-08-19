@@ -6,6 +6,8 @@ syntax = "proto3";
 
 package accrescent.server.events.v1;
 
+import "buf/validate/validate.proto";
+
 option java_multiple_files = true;
 option java_package = "app.accrescent.server.events.v1";
 
@@ -13,5 +15,5 @@ option java_package = "app.accrescent.server.events.v1";
 message Image {
   // Unique ID of the object in the repository bucket which contains the image
   // file.
-  optional string object_id = 1;
+  optional string object_id = 1 [(buf.validate.field).required = true];
 }

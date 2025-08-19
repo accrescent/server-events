@@ -6,11 +6,13 @@ syntax = "proto3";
 
 package accrescent.server.events.v1;
 
+import "buf/validate/validate.proto";
+
 option java_multiple_files = true;
 option java_package = "app.accrescent.server.events.v1";
 
 // Associated metadata for an object in object storage
 message ObjectMetadata {
   // The uncompressed size of the object in bytes.
-  optional uint32 uncompressed_size = 1;
+  optional uint32 uncompressed_size = 1 [(buf.validate.field).required = true];
 }
