@@ -9,6 +9,7 @@ package accrescent.server.events.v1;
 import "accrescent/server/events/v1/app_listing.proto";
 import "accrescent/server/events/v1/package_metadata.proto";
 import "accrescent/server/events/v1/release_channel.proto";
+import "buf/validate/validate.proto";
 
 option java_multiple_files = true;
 option java_package = "app.accrescent.server.events.v1";
@@ -16,20 +17,61 @@ option java_package = "app.accrescent.server.events.v1";
 // An Android app
 message App {
   // The app's unique Android application ID.
-  optional string app_id = 1;
+  optional string app_id = 1 [
+    (buf.validate.field).required = true,
+    // According to
+    // https://developer.android.com/build/configure-app-module#set-application-id,
+    // the app ID must conform to the following rules:
+    //
+    // 1. It must have at least two segments (one or more dots).
+    // 2. Each segment must start with a letter.
+    // 3. All characters must be alphanumeric or an underscore [a-zA-Z0-9_].
+    //
+    // The maximum length is imposed by us to set a reasonable limit.
+    (buf.validate.field).string = {
+      pattern: "^([a-zA-Z][a-zA-Z0-9_]*\\.)+[a-zA-Z][a-zA-Z0-9_]*$"
+      max_bytes: 128
+    }
+  ];
 
   // The default listing language of this app as a BCP-47 tag.
-  optional string default_listing_language = 2;
+  optional string default_listing_language = 2 [(buf.validate.field).required = true];
 
   // The app's listings to be displayed in client UI.
   repeated AppListing listings = 3;
 
   // Map of a release channel to corresponding package metadata.
   message PackageMetadataEntry {
-    ReleaseChannel release_channel = 1;
-    PackageMetadata package_metadata = 2;
+    ReleaseChannel release_channel = 1 [(buf.validate.field).required = true];
+    PackageMetadata package_metadata = 2 [(buf.validate.field).required = true];
   }
 
   // The package metadata of the app's latest versions for each release channel.
   repeated PackageMetadataEntry package_metadata = 4;
+
+  option (buf.validate.message).cel = {
+    id: "listings.languages_are_unique"
+    message: "listing languages must be unique"
+    expression: "this.listings.map(l, l.language).unique()"
+  };
+
+  option (buf.validate.message).cel = {
+    id: "default_listing_language.is_in_listings"
+    message: "default listing language must exist in listings"
+    expression: "this.default_listing_language in this.listings.map(l, l.language)"
+  };
+
+  option (buf.validate.message).cel = {
+    id: "package_metadata.contains_stable_channel"
+    message: "stable channel metadata must be provided"
+    expression:
+      "accrescent.server.events.v1.ReleaseChannel.WellKnown.WELL_KNOWN_STABLE"
+      " in this.package_metadata.map(p, p.release_channel.well_known)"
+  };
+
+  option (buf.validate.message).cel = {
+    id: "package_metadata.release_channels_are_unique"
+    message: "release channels must be unique"
+    expression: "this.package_metadata.map(p, p.release_channel.well_known).unique()"
+  };
 }

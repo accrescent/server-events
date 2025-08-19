@@ -7,6 +7,7 @@ syntax = "proto3";
 package accrescent.server.events.v1;
 
 import "accrescent/server/events/v1/app.proto";
+import "buf/validate/validate.proto";
 
 option java_multiple_files = true;
 option java_package = "app.accrescent.server.events.v1";
@@ -14,8 +15,8 @@ option java_package = "app.accrescent.server.events.v1";
 // An app edit representing an atomic change to an app's published metadata.
 message AppEdit {
   // This app edit's unique ID.
-  optional string id = 1;
+  optional string id = 1 [(buf.validate.field).required = true];
 
   // The app metadata to replace the old app metadata.
-  App app = 2;
+  App app = 2 [(buf.validate.field).required = true];
 }

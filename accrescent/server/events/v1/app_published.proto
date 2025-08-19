@@ -7,6 +7,7 @@ syntax = "proto3";
 package accrescent.server.events.v1;
 
 import "accrescent/server/events/v1/app.proto";
+import "buf/validate/validate.proto";
 
 option java_multiple_files = true;
 option java_package = "app.accrescent.server.events.v1";
@@ -14,5 +15,5 @@ option java_package = "app.accrescent.server.events.v1";
 // An event indicating that a new app has been published.
 message AppPublished {
   // The metadata of the app published.
-  App app = 1;
+  App app = 1 [(buf.validate.field).required = true];
 }
