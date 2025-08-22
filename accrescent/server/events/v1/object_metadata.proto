@@ -13,6 +13,9 @@ option java_package = "app.accrescent.server.events.v1";
 
 // Associated metadata for an object in object storage
 message ObjectMetadata {
+  // The ID of the object in object storage.
+  optional string id = 1 [(buf.validate.field).required = true];
+
   // The uncompressed size of the object in bytes.
-  optional uint32 uncompressed_size = 1 [(buf.validate.field).required = true];
+  optional uint32 uncompressed_size = 2 [(buf.validate.field).required = true];
 }

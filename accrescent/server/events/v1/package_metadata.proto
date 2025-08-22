@@ -24,19 +24,16 @@ message PackageMetadata {
   // The display name of the app's latest version, e.g., "1.4.2".
   optional string version_name = 2 [(buf.validate.field).required = true];
 
-  // The resulting metadata of building the app's APK set, modified to point to
-  // the object IDs of each APK in the repository bucket. That is, each
-  // build_apks_result.[variant].[apk_set].[apk_description].path is actually
-  // the object ID of the respective APK in the repository bucket.
+  // The resulting metadata of building the app's APK set.
   android.bundle.BuildApksResult build_apks_result = 3 [(buf.validate.field).required = true];
 
-  // A map between each object ID and its corresponding metadata such as
+  // A map between each APK path and its corresponding metadata such as
   // uncompressed size.
-  map<string, ObjectMetadata> object_metadata = 4;
+  map<string, ObjectMetadata> apk_object_metadata = 4;
 
   option (buf.validate.message).cel = {
-    id: "build_apks_result.objects_have_metadata_specified"
-    message: "all objects must have metadata specified"
+    id: "build_apks_result.apks_have_object_metadata_specified"
+    message: "all APKs must have object metadata specified"
     expression:
       "this.build_apks_result.variant.all("
       "  v,"
@@ -44,17 +41,17 @@ message PackageMetadata {
       "    s,"
       "    s.apk_description.all("
       "      d,"
-      "      d.path in this.object_metadata.map(k, k)"
+      "      d.path in this.apk_object_metadata.map(k, k)"
       "    )"
       "  )"
       ")"
   };
 
   option (buf.validate.message).cel = {
-    id: "object_metadata.must_exist_in_build_apks_result"
-    message: "object metadata must reference existing object"
+    id: "apk_object_metadata.must_reference_existing_apk"
+    message: "APK object metadata must reference existing APK"
     expression:
-      "this.object_metadata.map(k, k).all("
+      "this.apk_object_metadata.map(k, k).all("
       "  id,"
       "  this.build_apks_result.variant.exists("
       "    v,"
