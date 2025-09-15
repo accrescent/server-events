@@ -16,9 +16,9 @@ option java_package = "app.accrescent.server.events.v1";
 // Metadata for a specific version of an Android package.
 message PackageMetadata {
   // The version code of the app's latest version.
-  optional uint32 version_code = 1 [
+  optional uint64 version_code = 1 [
     (buf.validate.field).required = true,
-    (buf.validate.field).uint32.gt = 0
+    (buf.validate.field).uint64.gt = 0
   ];
 
   // The display name of the app's latest version, e.g., "1.4.2".
